@@ -25,28 +25,27 @@ export default function Home() {
   const isAiResponding = isLoading || messages[messages.length - 1]?.isStreaming === true;
 
   return (
-    // Main container with a darker background
     <div className="flex h-screen bg-gray-950 text-gray-200 font-sans">
       <Sidebar />
-      {/* Main content area with padding for the fixed sidebar */}
       <main className="flex-1 flex flex-col pl-20 pr-4 md:pr-8 py-6">
         <div ref={chatContainerRef} className="flex-1 overflow-y-auto custom-scrollbar pr-4">
-          <div className="max-w-4xl mx-auto h-full">
-            {messages.length === 0 ? (
+          {/* Increased max-width for a more spacious layout */}
+          <div className="max-w-5xl mx-auto h-full">
+            {messages.length === 0 && !isLoading ? (
               <WelcomeScreen onSuggestedQuestionClick={handleSuggestedQuestion} />
             ) : (
-              <div className="space-y-8 pb-8">
+              // Increased vertical spacing between messages
+              <div className="space-y-10 pb-8">
                 {messages.map((msg) => (
                   <ChatMessage key={msg.id} message={msg} />
                 ))}
-                {/* This line was added */}
                 {isLoading && <LoadingIndicator />}
               </div>
             )}
           </div>
         </div>
-        <div className="pt-4 max-w-4xl mx-auto w-full">
-          {suggestedQuestions.length > 0 && !isLoading && (
+        <div className="pt-4 max-w-5xl mx-auto w-full">
+          {suggestedQuestions.length > 0 && !isAiResponding && (
             <div className="flex flex-wrap gap-2 mb-4 animate-fade-in">
               {suggestedQuestions.map((q, i) => (
                 <button

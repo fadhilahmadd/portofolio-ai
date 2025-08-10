@@ -3,43 +3,147 @@
 @tailwind utilities;
 @tailwind components;
 
-body {
-  background-color: #030712; /* Corresponds to Tailwind's gray-950 */
+@layer components {
+  .user-message-bubble {
+    @apply bg-blue-800 text-white rounded-xl rounded-br-none px-4 py-2 max-w-xl;
+  }
 }
 
-/* Custom scrollbar for a sleeker look */
+body {
+  background-color: #030712; /* gray-950 */
+}
+
+/* Custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #1f2937; /* gray-800 */
   border-radius: 3px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #374151; /* gray-700 */
 }
 
-/* Animation for the blinking cursor */
+/* Blinking cursor animation */
 @keyframes blink {
-  50% {
-    opacity: 0;
-  }
+  50% { opacity: 0; }
 }
 .animate-blink {
   animation: blink 1s step-start 0s infinite;
 }
 
-/* Simple fade-in animation for suggested questions */
+/* Fade-in animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* --- Gemini-like Markdown Styling --- */
+.prose {
+  --tw-prose-body: #d1d5db;
+  --tw-prose-headings: #f9fafb;
+  --tw-prose-links: #93c5fd;
+  --tw-prose-bold: #f3f4f6;
+  --tw-prose-bullets: #60a5fa;
+  --tw-prose-hr: #374151;
+  --tw-prose-quotes: #d1d5db;
+  --tw-prose-quote-borders: #3b82f6;
+  --tw-prose-code: #f9fafb;
+  --tw-prose-pre-code: #d1d5db;
+  --tw-prose-pre-bg: #0a0f1d;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  margin-top: 1.75em;
+  margin-bottom: 1em;
+  font-weight: 600;
+}
+
+.prose p {
+  line-height: 1.75;
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.prose ul, .prose ol {
+  padding-left: 1.5rem;
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.prose li {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+.prose li > p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose strong {
+  color: var(--tw-prose-bold);
+  font-weight: 600;
+}
+
+/* Custom Code Block Styling */
+.prose pre {
+  border: 1px solid #1f2937;
+  border-radius: 0.75rem;
+  padding: 0;
+  background-color: var(--tw-prose-pre-bg);
+  overflow: hidden;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+.code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1f2937;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: #9ca3af;
+  border-bottom: 1px solid #1f2937;
+}
+
+.code-block-header button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.code-block-header button:hover {
+  background-color: #374151;
+  color: #d1d5db;
+}
+
+.prose pre code {
+  display: block;
+  padding: 1rem;
+  white-space: pre-wrap;
+  background-color: transparent !important;
+}
+
+.prose code:not(pre code) {
+  background-color: #2d3748;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.3rem;
+  font-weight: 500;
+  font-size: 0.9em;
 }

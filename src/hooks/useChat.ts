@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Message } from '@/types';
-import { postChatMessage } from '@/lib/api';
+import { streamChatResponse } from '@/lib/api';
 
 export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -33,41 +33,46 @@ export const useChat = () => {
     setError(null);
     setSuggestedQuestions([]);
 
-    try {
-      const { response, suggested_questions } = await postChatMessage(sessionId, messageText);
-      setIsLoading(false); 
+    let isFirstToken = true;
+    const aiMessageId = uuidv4();
 
-      // --- Start of Streaming Logic ---
-      const aiMessageId = uuidv4();
-      const initialAiMessage: Message = { id: aiMessageId, sender: 'ai', text: '', isStreaming: true };
-      setMessages(prev => [...prev, initialAiMessage]);
-
-      let streamedText = '';
-      const interval = setInterval(() => {
-        if (streamedText.length < response.length) {
-          streamedText = response.substring(0, streamedText.length + 1);
-          setMessages(prev => prev.map(msg => 
-            msg.id === aiMessageId ? { ...msg, text: streamedText } : msg
-          ));
+    await streamChatResponse(
+      sessionId,
+      messageText,
+      (token) => {
+        if (isFirstToken) {
+          setIsLoading(false);
+          const initialAiMessage: Message = { id: aiMessageId, sender: 'ai', text: token, isStreaming: true };
+          setMessages(prev => [...prev, initialAiMessage]);
+          isFirstToken = false;
         } else {
-          clearInterval(interval);
           setMessages(prev => prev.map(msg => 
-            msg.id === aiMessageId ? { ...msg, isStreaming: false } : msg
+            msg.id === aiMessageId ? { ...msg, text: msg.text + token } : msg
           ));
-          if (suggested_questions) {
-            setSuggestedQuestions(suggested_questions);
-          }
-           setIsLoading(false);
         }
-      }, 20); // Adjust speed of streaming here
-      // --- End of Streaming Logic ---
-
-    } catch (err: any) {
-      const errorMessage = "I apologize, but I'm encountering a technical issue at the moment. Please try again in a little while.";
-      setError(errorMessage);
-      setMessages(prev => [...prev, { id: uuidv4(), sender: 'ai', text: errorMessage }]);
-      setIsLoading(false);
-    }
+      },
+      (finalData) => {
+        if (finalData.suggested_questions) {
+          setSuggestedQuestions(finalData.suggested_questions);
+        }
+        setMessages(prev => prev.map(msg => 
+          msg.id === aiMessageId ? { ...msg, isStreaming: false } : msg
+        ));
+      },
+      (err) => {
+        setIsLoading(false);
+        const errorMessage = "I apologize, but I'm encountering a technical issue at the moment. Please try again in a little while.";
+        setError(errorMessage);
+        
+        if (isFirstToken) {
+          setMessages(prev => [...prev, { id: aiMessageId, sender: 'ai', text: errorMessage, isStreaming: false }]);
+        } else {
+          setMessages(prev => prev.map(msg => 
+              msg.id === aiMessageId ? { ...msg, text: errorMessage, isStreaming: false } : msg
+          ));
+        }
+      }
+    );
   };
 
   return {
