@@ -55,13 +55,31 @@ export const useChat = () => {
         if (finalData.suggested_questions) {
           setSuggestedQuestions(finalData.suggested_questions);
         }
-        setMessages(prev => prev.map(msg => 
-          msg.id === aiMessageId ? { ...msg, isStreaming: false } : msg
-        ));
+        
+        // Find the AI message that was just streaming and update it
+        setMessages(prev => prev.map(msg => {
+          if (msg.id === aiMessageId) {
+            // Create a copy of the message to modify
+            const updatedMsg = { ...msg, isStreaming: false };
+            
+            // If the final data contains a mailto link, append it to the message text
+            if (finalData.mailto) {
+              // The \n\n ensures the link appears on a new line for better formatting
+              updatedMsg.text += `\n\n[Click here to send an email](${finalData.mailto})`;
+            }
+            
+            return updatedMsg;
+          }
+          return msg;
+        }));
       },
       (err) => {
         setIsLoading(false);
-        const errorMessage = "I apologize, but I'm encountering a technical issue at the moment. Please try again in a little while.";
+        // Provide a more specific error message if available
+        const errorMessage = err instanceof Error 
+          ? `I apologize, but an error occurred: ${err.message}`
+          : "I apologize, but I'm encountering a technical issue at the moment. Please try again in a little while.";
+        
         setError(errorMessage);
         
         if (isFirstToken) {

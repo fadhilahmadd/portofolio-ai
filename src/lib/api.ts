@@ -28,7 +28,8 @@ export const streamChatResponse = async (
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorBody = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorBody || 'An error occurred'}`);
     }
 
     const reader = response.body?.getReader();

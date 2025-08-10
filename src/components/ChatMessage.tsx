@@ -63,7 +63,8 @@ const PreBlock: FC<PropsWithChildren<{}>> = ({ children, ...props }) => {
 };
 
 const ParagraphRenderer: FC<PropsWithChildren<{}>> = ({ children }) => {
-    return <div>{children}</div>;
+    // Using a <p> tag is more semantically correct for paragraphs.
+    return <p className="mb-4 last:mb-0">{children}</p>;
 };
 
 
