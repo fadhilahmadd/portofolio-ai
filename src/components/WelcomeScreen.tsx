@@ -20,7 +20,7 @@ export const WelcomeScreen = ({ onSuggestedQuestionClick }: WelcomeScreenProps) 
         </div>
       </div>
       <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-gray-200 to-gray-400">
-        How can I help you today?
+        I'am Fadhil Assistance, How can I help you today?
       </h1>
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
         {exampleQuestions.map((q, i) => (
