@@ -8,6 +8,12 @@ import { WelcomeScreen } from '@/components/WelcomeScreen';
 import { LoadingIndicator } from '@/components/LoadingIndicator'; 
 
 export default function Home() {
+  const isIndonesian =
+    typeof navigator !== 'undefined' && (
+      (navigator.language && navigator.language.toLowerCase().startsWith('id')) ||
+      (Array.isArray(navigator.languages) && navigator.languages.some(l => l.toLowerCase().startsWith('id')))
+    );
+
   const {
     messages,
     input,
@@ -46,7 +52,7 @@ export default function Home() {
         </div>
         <div className="pt-4 max-w-5xl mx-auto w-full">
           {suggestedQuestions.length > 0 && !isAiResponding && (
-            <div className="flex flex-wrap gap-2 mb-4 animate-fade-in">
+            <div className="flex flex-wrap gap-2 mb-4 animate-fade-in bg-gray-900/40 backdrop-blur-sm border border-white/10 rounded-xl p-3">
               {suggestedQuestions.map((q, i) => (
                 <button
                   key={i}
@@ -65,7 +71,9 @@ export default function Home() {
             isResponding={isAiResponding}
           />
            <p className="text-xs text-gray-500 text-center mt-3">
-            AI can make mistakes. Consider checking important information. This is a portfolio project by Fadhil Ahmad Hidayat.
+            {isIndonesian
+              ? 'AI bisa saja keliru. Pertimbangkan untuk memeriksa informasi penting. Ini adalah proyek portofolio oleh Fadhil Ahmad Hidayat.'
+              : 'AI can make mistakes. Consider checking important information. This is a portfolio project by Fadhil Ahmad Hidayat.'}
           </p>
         </div>
       </main>

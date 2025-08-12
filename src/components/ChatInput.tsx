@@ -1,3 +1,5 @@
+"use client";
+
 import { Send } from 'lucide-react';
 
 interface ChatInputProps {
@@ -8,6 +10,14 @@ interface ChatInputProps {
 }
 
 export const ChatInput = ({ input, setInput, handleSend, isResponding }: ChatInputProps) => {
+  const isIndonesian =
+    typeof navigator !== 'undefined' && (
+      (navigator.language && navigator.language.toLowerCase().startsWith('id')) ||
+      (Array.isArray(navigator.languages) && navigator.languages.some(l => l.toLowerCase().startsWith('id')))
+    );
+
+  const placeholder = isIndonesian ? 'Tulis pertanyaan di sini' : 'Enter a prompt here';
+
   return (
     <div className="relative">
       <input
@@ -15,7 +25,7 @@ export const ChatInput = ({ input, setInput, handleSend, isResponding }: ChatInp
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-        placeholder="Enter a prompt here"
+        placeholder={placeholder}
         className="w-full bg-white/5 border border-white/10 focus:border-blue-500 focus:ring-0 rounded-full py-3 pl-6 pr-14 text-white placeholder-gray-500 transition-colors"
         disabled={isResponding}
       />
