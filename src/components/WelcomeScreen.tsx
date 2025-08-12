@@ -1,3 +1,5 @@
+"use client";
+
 import { Bot } from 'lucide-react';
 
 interface WelcomeScreenProps {
@@ -5,11 +7,23 @@ interface WelcomeScreenProps {
 }
 
 export const WelcomeScreen = ({ onSuggestedQuestionClick }: WelcomeScreenProps) => {
-  const exampleQuestions = [
-    "What are Fadhil\'s main technical skills?",
-    "Tell me about the \"Nutrichef\" project.",
-    "What was his role at PT SKI ABIYOSOFT?",
-  ];
+  const isIndonesian =
+    typeof navigator !== 'undefined' && (
+      (navigator.language && navigator.language.toLowerCase().startsWith('id')) ||
+      (Array.isArray(navigator.languages) && navigator.languages.some(l => l.toLowerCase().startsWith('id')))
+    );
+
+  const exampleQuestions = isIndonesian
+    ? [
+        'Apa saja keahlian teknis utama Fadhil?',
+        'Ceritakan tentang proyek "Nutrichef".',
+        'Apa peran Fadhil di PT. SKI ABIYOSOFT?',
+      ]
+    : [
+        "What are Fadhil's main technical skills?",
+        'Tell me about the "Nutrichef" project.',
+        'What was his role at PT. SKI ABIYOSOFT?',
+      ];
 
   return (
     <div className="flex flex-col items-center justify-center h-full text-center">

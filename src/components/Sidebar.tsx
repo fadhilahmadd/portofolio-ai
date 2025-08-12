@@ -7,10 +7,10 @@ export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { name: 'My Portfolio', icon: Bot, href: '[https://fadhilahmad.vercel.app](https://fadhilahmad.vercel.app)' },
-    { name: 'GitHub', icon: Github, href: '[https://github.com/fadhilahmadd](https://github.com/fadhilahmadd)' },
-    { name: 'LinkedIn', icon: Linkedin, href: '[https://www.linkedin.com/in/fadhil-ahmad-hidayat-604623139/](https://www.linkedin.com/in/fadhil-ahmad-hidayat-604623139/)' },
-    { name: 'Resume', icon: Download, href: '[https://resume-fadhil-ahmad.tiiny.site](https://resume-fadhil-ahmad.tiiny.site)' },
+    { name: 'My Portfolio', icon: Bot, href: 'http://portofolio-fadhilahmad.netlify.app/' },
+    { name: 'GitHub', icon: Github, href: 'https://github.com/fadhilahmadd' },
+    { name: 'LinkedIn', icon: Linkedin, href: 'https://www.linkedin.com/in/fadhil-ahmad-hidayat-604623139/' },
+    { name: 'Resume', icon: Download, href: 'https://resume-fadhil-ahmad.tiiny.site' },
   ];
 
   return (

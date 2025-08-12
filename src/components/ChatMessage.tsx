@@ -1,4 +1,4 @@
-import { useState, Children, isValidElement, FC, ReactNode, ComponentPropsWithoutRef } from 'react';
+import { useState, useEffect, useMemo, Children, isValidElement, FC, ReactNode, ComponentPropsWithoutRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Bot, User, Clipboard, Check, ArrowUpRight, Mail } from 'lucide-react';
@@ -115,6 +115,59 @@ export const ChatMessage = ({ message }: { message: Message }) => {
     );
   }
 
+  // Typewriter effect that reveals text word-by-word while streaming
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [visibleUnitsCount, setVisibleUnitsCount] = useState(0);
+
+  // Reset animation when a new AI message instance appears
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    setVisibleUnitsCount(0);
+  }, [message.id]);
+
+  // Build word units as [word + following space] so we reveal cleanly per word
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const wordUnits = useMemo(() => {
+    const text = message.text || '';
+    const segments = text.match(/\S+|\s+/g) || [];
+    const units: string[] = [];
+    for (let i = 0; i < segments.length; ) {
+      const seg = segments[i];
+      if (/\S/.test(seg)) {
+        const next = segments[i + 1];
+        const withSpace = next && /^\s+$/.test(next) ? seg + next : seg;
+        units.push(withSpace);
+        i += withSpace.length > seg.length ? 2 : 1;
+      } else {
+        // Leading/isolated whitespace
+        units.push(seg);
+        i += 1;
+      }
+    }
+    return units;
+  }, [message.text]);
+
+  // Advance the animation while streaming or until all current words are shown
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    if (visibleUnitsCount >= wordUnits.length) return;
+
+    const speedMs = 60; // per-word reveal speed
+    const timer = setTimeout(() => {
+      setVisibleUnitsCount((prev) => Math.min(prev + 1, wordUnits.length));
+    }, speedMs);
+
+    return () => clearTimeout(timer);
+  }, [visibleUnitsCount, wordUnits.length]);
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const displayText = useMemo(() => {
+    if (wordUnits.length === 0) return '';
+    return wordUnits.slice(0, visibleUnitsCount).join('');
+  }, [wordUnits, visibleUnitsCount]);
+
+  const shouldShowCursor = message.isStreaming || visibleUnitsCount < wordUnits.length;
+
   return (
     <div className="flex items-start gap-4">
       <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center border border-white/10 bg-gray-800">
@@ -130,9 +183,9 @@ export const ChatMessage = ({ message }: { message: Message }) => {
               a: LinkRenderer,
             }}
           >
-            {message.text}
+            {displayText}
           </ReactMarkdown>
-          {message.isStreaming && <BlinkingCursor />}
+          {shouldShowCursor && <BlinkingCursor />}
         </div>
       </div>
     </div>
