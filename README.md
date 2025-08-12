@@ -32,10 +32,7 @@ docker compose logs -f web
 
 - NEXT_PUBLIC_API_BASE_URL: Public URL of your backend chat API, used by `src/lib/api.ts`.
   - Must be prefixed with `NEXT_PUBLIC_` to be exposed to the browser.
-  - In Docker, this value is passed both at build time and runtime. If you change it, rebuild:
-    ```bash
-    docker compose build --no-cache && docker compose up -d
-    ```
+  - With runtime env enabled, changing this in `.env` does not require a rebuild — just `docker compose up -d`.
 
 ## Local development
 

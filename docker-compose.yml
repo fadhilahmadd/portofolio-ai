@@ -3,9 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        # Override at build time if desired: `--build-arg NEXT_PUBLIC_API_BASE_URL=...`
-        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
     image: portfolio-ai-frontend:latest
     ports:
       - "3000:3000"
