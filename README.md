@@ -11,11 +11,11 @@ Set your backend API base URL and start the app:
 
 ```bash
 # Option A: use a .env file (recommended)
-echo "NEXT_PUBLIC_API_BASE_URL=http://localhost:8000" > .env
+echo "API_BASE_URL=http://localhost:8000" > .env
 docker compose up -d
 
 # Option B: inline environment variable
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 docker compose up -d
+API_BASE_URL=http://localhost:8000 docker compose up -d
 ```
 
 - App will be available at: http://localhost:3000
@@ -30,15 +30,14 @@ docker compose logs -f web
 
 ### Environment variables
 
-- NEXT_PUBLIC_API_BASE_URL: Public URL of your backend chat API, used by `src/lib/api.ts`.
-  - Must be prefixed with `NEXT_PUBLIC_` to be exposed to the browser.
-  - With runtime env enabled, changing this in `.env` does not require a rebuild — just `docker compose up -d`.
+- API_BASE_URL: Server-only URL of your backend chat API (used by the proxy at `app/api/chat`).
+  - Changes take effect with `docker compose up -d` (no rebuild required).
 
 ## Local development
 
 ```bash
 npm ci
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 npm run dev
+API_BASE_URL=http://localhost:8000 npm run dev
 ```
 
 Open http://localhost:3000 and edit files under `src/`. The dev server supports hot reload.
@@ -46,7 +45,7 @@ Open http://localhost:3000 and edit files under `src/`. The dev server supports 
 ## Production build (without Docker)
 
 ```bash
-NEXT_PUBLIC_API_BASE_URL=https://your-api.example.com npm run build
+API_BASE_URL=https://your-api.example.com npm run build
 npm start
 ```
 

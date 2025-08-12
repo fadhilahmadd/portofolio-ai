@@ -16,7 +16,7 @@ export const streamChatResponse = async (
   onError: (error: Error) => void
 ) => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/chat/`, {
+    const response = await fetch(`/api/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
