@@ -52,7 +52,7 @@ export default function Home() {
         </div>
         <div className="pt-4 max-w-5xl mx-auto w-full">
           {suggestedQuestions.length > 0 && !isAiResponding && (
-            <div className="flex flex-wrap gap-2 mb-4 animate-fade-in bg-gray-900/40 backdrop-blur-sm border border-white/10 rounded-xl p-3">
+            <div className="flex flex-wrap gap-2 mb-4 animate-fade-in">
               {suggestedQuestions.map((q, i) => (
                 <button
                   key={i}
