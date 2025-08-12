@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     image: portfolio-ai-frontend:latest
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000" 
     environment:
       # Runtime envs (NEXT_PUBLIC_* also need to be present at build time for Next to expose on client)
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
