@@ -1,4 +1,4 @@
-import { useState, Children, isValidElement, FC, PropsWithChildren, ReactNode } from 'react';
+import { useState, Children, isValidElement, FC, ReactNode, ComponentPropsWithoutRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Bot, User, Clipboard, Check, ArrowUpRight, Mail } from 'lucide-react';
@@ -9,7 +9,7 @@ interface CodeProps {
   children?: ReactNode;
 }
 
-const PreBlock: FC<PropsWithChildren<{}>> = ({ children, ...props }) => {
+const PreBlock: FC<ComponentPropsWithoutRef<'pre'>> = ({ children, ...props }) => {
   const [copied, setCopied] = useState(false);
 
   const child = Children.toArray(children)[0];
@@ -29,7 +29,7 @@ const PreBlock: FC<PropsWithChildren<{}>> = ({ children, ...props }) => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       });
-    } catch (err) {
+    } catch (_error) {
       const textArea = document.createElement('textarea');
       textArea.value = code;
       document.body.appendChild(textArea);
@@ -39,8 +39,8 @@ const PreBlock: FC<PropsWithChildren<{}>> = ({ children, ...props }) => {
         document.execCommand('copy');
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error('Fallback copy failed', err);
+      } catch (copyError) {
+        console.error('Fallback copy failed', copyError);
       }
       document.body.removeChild(textArea);
     }
@@ -62,17 +62,18 @@ const PreBlock: FC<PropsWithChildren<{}>> = ({ children, ...props }) => {
   );
 };
 
-const ParagraphRenderer: FC<PropsWithChildren<{}>> = ({ children }) => {
+const ParagraphRenderer: FC<{ children?: ReactNode }> = ({ children }) => {
     // Using a <p> tag is more semantically correct for paragraphs.
     return <p className="mb-4 last:mb-0">{children}</p>;
 };
 
 
-const LinkRenderer = ({ href, children }: any) => {
+const LinkRenderer: FC<React.AnchorHTMLAttributes<HTMLAnchorElement>> = ({ href, children, ...rest }) => {
   if (href && href.startsWith('mailto:')) {
     return (
       <a
         href={href}
+        {...rest}
         className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg no-underline transition-colors text-base my-4"
       >
         <Mail className="h-5 w-5" />
@@ -86,6 +87,7 @@ const LinkRenderer = ({ href, children }: any) => {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      {...rest}
       className="inline-flex items-center gap-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 px-2 py-1 rounded-lg text-blue-300 no-underline transition-colors text-sm"
     >
       <span>{children}</span>

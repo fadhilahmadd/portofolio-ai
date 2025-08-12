@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Portfolio AI Frontend – Next.js app ready for Docker deployment.
 
-## Getting Started
+## Prerequisites
 
-First, run the development server:
+- Docker (Engine 24+ recommended)
+- Docker Compose v2 (comes with modern Docker Desktop)
+
+## Quick start (Docker Compose)
+
+Set your backend API base URL and start the app:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Option A: use a .env file (recommended)
+echo "NEXT_PUBLIC_API_BASE_URL=http://localhost:8000" > .env
+docker compose up -d
+
+# Option B: inline environment variable
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 docker compose up -d
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- App will be available at: http://localhost:3000
+- Stop the stack:
+```bash
+docker compose down
+```
+- View logs:
+```bash
+docker compose logs -f web
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- NEXT_PUBLIC_API_BASE_URL: Public URL of your backend chat API, used by `src/lib/api.ts`.
+  - Must be prefixed with `NEXT_PUBLIC_` to be exposed to the browser.
+  - In Docker, this value is passed both at build time and runtime. If you change it, rebuild:
+    ```bash
+    docker compose build --no-cache && docker compose up -d
+    ```
 
-## Learn More
+## Local development
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm ci
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open http://localhost:3000 and edit files under `src/`. The dev server supports hot reload.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Production build (without Docker)
 
-## Deploy on Vercel
+```bash
+NEXT_PUBLIC_API_BASE_URL=https://your-api.example.com npm run build
+npm start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Docker image details
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Multi-stage `Dockerfile` on `node:20-alpine`
+- Uses Next.js `output: "standalone"` for a small runtime image
+- Runs as a non-root user, listens on port `3000`
+
+## Project scripts
+
+```bash
+npm run dev    # Start dev server
+npm run build  # Production build
+npm run start  # Start production server
+npm run lint   # Lint
+```
+
+## Notes
+
+- Only environment variables prefixed with `NEXT_PUBLIC_` are available to the browser.
+- If your backend requires CORS, ensure it allows requests from the frontend origin (e.g., `http://localhost:3000`).
