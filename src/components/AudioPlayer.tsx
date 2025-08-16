@@ -1,5 +1,5 @@
 import { Play, Pause } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface AudioPlayerProps {
   audioUrl: string;
@@ -9,30 +9,39 @@ export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Define the ended handler using useCallback to keep its reference stable
+  const onEnded = useCallback(() => {
+    setIsPlaying(false);
+  }, []);
+
   useEffect(() => {
-    audioRef.current = new Audio(audioUrl);
-    
-    const audio = audioRef.current;
+    // Create and configure the new audio element
+    const newAudio = new Audio(audioUrl);
+    audioRef.current = newAudio;
+    newAudio.addEventListener('ended', onEnded);
 
-    const onEnded = () => setIsPlaying(false);
-    audio.addEventListener('ended', onEnded);
+    // If the component was already in a "playing" state, start the new audio
+    if (isPlaying) {
+      newAudio.play().catch(e => console.error("Error playing new audio:", e));
+    }
 
+    // Cleanup function: runs when audioUrl changes or component unmounts
     return () => {
-      audio.removeEventListener('ended', onEnded);
-      audio.pause();
-      audioRef.current = null;
+      newAudio.pause();
+      newAudio.removeEventListener('ended', onEnded);
     };
-  }, [audioUrl]);
+  }, [audioUrl, onEnded]);
 
   const togglePlayPause = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play().catch(e => console.error("Error playing audio:", e));
     }
+    setIsPlaying(!isPlaying);
   };
 
   return (

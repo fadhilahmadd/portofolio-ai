@@ -1,5 +1,26 @@
 /**
- * Parses a multipart/mixed response.
+ * A helper function to find the index of a subarray (needle) in a Uint8Array (haystack).
+ * @param haystack The array to search in.
+ * @param needle The array to search for.
+ * @param offset The starting position for the search.
+ * @returns The index of the first occurrence of the needle, or -1 if not found.
+ */
+function findSubarray(haystack: Uint8Array, needle: Uint8Array, offset: number = 0): number {
+    for (let i = offset; i <= haystack.length - needle.length; i++) {
+        let found = true;
+        for (let j = 0; j < needle.length; j++) {
+            if (haystack[i + j] !== needle[j]) {
+                found = false;
+                break;
+            }
+        }
+        if (found) return i;
+    }
+    return -1;
+}
+
+/**
+ * Parses a multipart/mixed response containing JSON and a file blob by operating on bytes.
  * @param response - The fetch response object.
  * @returns An object containing the JSON data and the audio blob.
  */
@@ -12,50 +33,47 @@ async function parseMultipartResponse(response: Response): Promise<{ jsonData: a
   }
 
   const arrayBuffer = await response.arrayBuffer();
-  const decoder = new TextDecoder();
-  const dataView = new DataView(arrayBuffer);
-  const text = decoder.decode(dataView);
-  const parts = text.split(`--${boundary}`);
-  
+  const uint8Array = new Uint8Array(arrayBuffer);
+  const boundaryBytes = new TextEncoder().encode(`--${boundary}`);
+  const headerEndBytes = new Uint8Array([13, 10, 13, 10]); // \r\n\r\n
+
   let jsonData: any = null;
   let audioBlob: Blob | null = null;
-  
-  // A more robust way to find the start of the binary data
-  const boundaryBytes = `--${boundary}`.split('').map(c => c.charCodeAt(0));
+  let currentIndex = findSubarray(uint8Array, boundaryBytes);
 
-  for (const part of parts) {
-    if (part.includes('Content-Type: application/json')) {
-      const jsonContent = part.split('\r\n\r\n')[1].trim();
-      if(jsonContent) jsonData = JSON.parse(jsonContent);
-    } else if (part.includes('Content-Type: audio/mpeg')) {
-      const contentIndex = text.indexOf(part);
-      const headersEndIndex = text.indexOf('\r\n\r\n', contentIndex) + 4;
-      const partStartIndex = headersEndIndex;
-      
-      let partEndIndex = -1;
-      // Find the next boundary in the original buffer
-      for (let i = partStartIndex; i < arrayBuffer.byteLength - boundaryBytes.length; i++) {
-        let found = true;
-        for (let j = 0; j < boundaryBytes.length; j++) {
-          if (dataView.getUint8(i + j) !== boundaryBytes[j]) {
-            found = false;
-            break;
-          }
-        }
-        if (found) {
-          partEndIndex = i - 2; // -2 for the \r\n before the boundary
-          break;
-        }
-      }
-      
-      if (partEndIndex === -1) {
-         partEndIndex = arrayBuffer.byteLength - (boundaryBytes.length + 4); // --boundary--
-      }
+  while (currentIndex !== -1) {
+    const nextIndex = findSubarray(uint8Array, boundaryBytes, currentIndex + boundaryBytes.length);
+    if (nextIndex === -1) break;
 
-      const audioData = arrayBuffer.slice(partStartIndex, partEndIndex);
-      audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
-      break; 
+    const partStart = currentIndex + boundaryBytes.length;
+    
+    // Check for the final boundary marker `--`
+    if (uint8Array[partStart + 2] === 45 && uint8Array[partStart + 3] === 45) {
+        break;
     }
+    
+    const headerEndIndexInPart = findSubarray(uint8Array, headerEndBytes, partStart);
+    if (headerEndIndexInPart === -1) {
+        currentIndex = nextIndex;
+        continue;
+    }
+
+    const headerText = new TextDecoder().decode(uint8Array.slice(partStart, headerEndIndexInPart)).trim();
+    const bodyStart = headerEndIndexInPart + headerEndBytes.length;
+    const bodyEnd = nextIndex - 2; // Exclude the trailing \r\n
+    const body = uint8Array.slice(bodyStart, bodyEnd);
+    
+    if (headerText.includes('Content-Type: application/json')) {
+      jsonData = JSON.parse(new TextDecoder().decode(body));
+    } else if (headerText.includes('Content-Type: audio/mpeg')) {
+      audioBlob = new Blob([body], { type: 'audio/mpeg' });
+    }
+
+    currentIndex = nextIndex;
+  }
+  
+  if (!jsonData) {
+      throw new Error("Failed to parse JSON part from multipart response");
   }
 
   return { jsonData, audioBlob };
