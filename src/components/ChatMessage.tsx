@@ -5,7 +5,6 @@ import { Bot, User, Clipboard, Check, ArrowUpRight, Mail } from 'lucide-react';
 import { Message } from '@/types';
 import { AudioPlayer } from './AudioPlayer';
 
-// ... (PreBlock, ParagraphRenderer, LinkRenderer remain the same)
 interface CodeProps {
   className?: string;
   children?: ReactNode;
@@ -31,7 +30,7 @@ const PreBlock: FC<ComponentPropsWithoutRef<'pre'>> = ({ children, ...props }) =
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       });
-    } catch (_error) {
+    } catch {
       const textArea = document.createElement('textarea');
       textArea.value = code;
       document.body.appendChild(textArea);
@@ -100,22 +99,18 @@ const LinkRenderer: FC<React.AnchorHTMLAttributes<HTMLAnchorElement>> = ({ href,
 
 const BlinkingCursor = () => <span className="animate-blink">▍</span>;
 
-export const ChatMessage = ({ message }: { message: Message }) => {
-  const isUser = message.sender === 'user';
+const UserMessage = ({ message }: { message: Message }) => (
+  <div className="flex items-start gap-4 justify-end">
+    <div className="user-message-bubble whitespace-pre-wrap">
+      {message.text}
+    </div>
+    <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center bg-blue-800">
+      <User className="h-5 w-5" />
+    </div>
+  </div>
+);
 
-  if (isUser) {
-    return (
-      <div className="flex items-start gap-4 justify-end">
-        <div className="user-message-bubble whitespace-pre-wrap">
-          {message.text}
-        </div>
-        <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center bg-blue-800">
-          <User className="h-5 w-5" />
-        </div>
-      </div>
-    );
-  }
-
+const AiMessage = ({ message }: { message: Message }) => {
   const [visibleUnitsCount, setVisibleUnitsCount] = useState(0);
 
   useEffect(() => {
@@ -182,4 +177,11 @@ export const ChatMessage = ({ message }: { message: Message }) => {
       </div>
     </div>
   );
+};
+
+export const ChatMessage = ({ message }: { message: Message }) => {
+  if (message.sender === 'user') {
+    return <UserMessage message={message} />;
+  }
+  return <AiMessage message={message} />;
 };

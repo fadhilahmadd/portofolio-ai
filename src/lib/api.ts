@@ -5,7 +5,7 @@
  * @param offset The starting position for the search.
  * @returns The index of the first occurrence of the needle, or -1 if not found.
  */
-function findSubarray(haystack: Uint8Array, needle: Uint8Array, offset: number = 0): number {
+function findSubarray(haystack: Uint8Array, needle: Uint8Array, offset = 0): number {
     for (let i = offset; i <= haystack.length - needle.length; i++) {
         let found = true;
         for (let j = 0; j < needle.length; j++) {
@@ -19,12 +19,18 @@ function findSubarray(haystack: Uint8Array, needle: Uint8Array, offset: number =
     return -1;
 }
 
+interface JsonData {
+  ai_response: string;
+  suggested_questions?: string[];
+  mailto?: string;
+}
+
 /**
  * Parses a multipart/mixed response containing JSON and a file blob by operating on bytes.
  * @param response - The fetch response object.
  * @returns An object containing the JSON data and the audio blob.
  */
-async function parseMultipartResponse(response: Response): Promise<{ jsonData: any; audioBlob: Blob | null }> {
+async function parseMultipartResponse(response: Response): Promise<{ jsonData: JsonData; audioBlob: Blob | null }> {
   const contentType = response.headers.get('Content-Type');
   const boundary = contentType?.match(/boundary=(.*)/)?.[1];
 
@@ -37,7 +43,7 @@ async function parseMultipartResponse(response: Response): Promise<{ jsonData: a
   const boundaryBytes = new TextEncoder().encode(`--${boundary}`);
   const headerEndBytes = new Uint8Array([13, 10, 13, 10]); // \r\n\r\n
 
-  let jsonData: any = null;
+  let jsonData: JsonData | null = null;
   let audioBlob: Blob | null = null;
   let currentIndex = findSubarray(uint8Array, boundaryBytes);
 

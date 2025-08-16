@@ -9,28 +9,24 @@ export const AudioPlayer = ({ audioUrl }: AudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Define the ended handler using useCallback to keep its reference stable
   const onEnded = useCallback(() => {
     setIsPlaying(false);
   }, []);
 
   useEffect(() => {
-    // Create and configure the new audio element
     const newAudio = new Audio(audioUrl);
     audioRef.current = newAudio;
     newAudio.addEventListener('ended', onEnded);
 
-    // If the component was already in a "playing" state, start the new audio
     if (isPlaying) {
       newAudio.play().catch(e => console.error("Error playing new audio:", e));
     }
 
-    // Cleanup function: runs when audioUrl changes or component unmounts
     return () => {
       newAudio.pause();
       newAudio.removeEventListener('ended', onEnded);
     };
-  }, [audioUrl, onEnded]);
+  }, [audioUrl, onEnded, isPlaying]);
 
   const togglePlayPause = () => {
     const audio = audioRef.current;

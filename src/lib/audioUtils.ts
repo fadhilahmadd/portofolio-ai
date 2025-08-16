@@ -9,6 +9,7 @@ export const convertWebmToWav = (webmBlob: Blob): Promise<Blob> => {
     reader.onload = async () => {
       try {
         const arrayBuffer = reader.result as ArrayBuffer;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         const originalAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
