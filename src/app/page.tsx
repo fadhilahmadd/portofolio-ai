@@ -35,12 +35,10 @@ export default function Home() {
       <Sidebar />
       <main className="flex-1 flex flex-col pl-20 pr-4 md:pr-8 py-6">
         <div ref={chatContainerRef} className="flex-1 overflow-y-auto custom-scrollbar pr-4">
-          {/* Increased max-width for a more spacious layout */}
           <div className="max-w-5xl mx-auto h-full">
             {messages.length === 0 && !isLoading ? (
               <WelcomeScreen onSuggestedQuestionClick={handleSuggestedQuestion} />
             ) : (
-              // Increased vertical spacing between messages
               <div className="space-y-10 pb-8">
                 {messages.map((msg) => (
                   <ChatMessage key={msg.id} message={msg} />
@@ -67,7 +65,7 @@ export default function Home() {
           <ChatInput
             input={input}
             setInput={setInput}
-            handleSend={() => handleSend()}
+            handleSend={handleSend}
             isResponding={isAiResponding}
           />
            <p className="text-xs text-gray-500 text-center mt-3">

@@ -1,9 +1,19 @@
-Portfolio AI Frontend – Next.js app ready for Docker deployment.
+# Portfolio AI Frontend
+
+A Next.js frontend for an AI-powered portfolio assistant, featuring both text and voice interaction. This application is ready for Docker deployment.
+
+## Features
+
+  - **Conversational AI:** Engage in a text-based chat with an AI assistant.
+  - **Voice Interaction:** Record messages using your microphone and listen to the AI's spoken responses.
+  - **Streaming Responses:** AI answers are streamed in real-time with a typewriter effect.
+  - **Markdown Support:** Responses are beautifully rendered with support for code blocks, lists, and more.
+  - **Dockerized:** Comes with a multi-stage `Dockerfile` for a small, efficient production image.
 
 ## Prerequisites
 
-- Docker (Engine 24+ recommended)
-- Docker Compose v2 (comes with modern Docker Desktop)
+  - Docker (Engine 24+ recommended)
+  - Docker Compose v2 (comes with modern Docker Desktop)
 
 ## Quick start (Docker Compose)
 
@@ -18,20 +28,13 @@ docker compose up -d
 API_BASE_URL=http://localhost:8000 docker compose up -d
 ```
 
-- App will be available at: http://localhost:3000
-- Stop the stack:
-```bash
-docker compose down
-```
-- View logs:
-```bash
-docker compose logs -f web
-```
+  - The app will be available at: http://localhost:3000
+  - To stop the stack, run: `docker compose down`
+  - To view logs, run: `docker compose logs -f web`
 
 ### Environment variables
 
-- API_BASE_URL: Server-only URL of your backend chat API (used by the proxy at `app/api/chat`).
-  - Changes take effect with `docker compose up -d` (no rebuild required).
+  - `API_BASE_URL`: The server-only URL of your backend chat API. This is used by the proxy at `app/api/chat`. Changes to this variable take effect with `docker compose up -d` (no rebuild required).
 
 ## Local development
 
@@ -51,20 +54,21 @@ npm start
 
 ## Docker image details
 
-- Multi-stage `Dockerfile` on `node:20-alpine`
-- Uses Next.js `output: "standalone"` for a small runtime image
-- Runs as a non-root user, listens on port `3000`
+  - Built on a `node:20-alpine` base image.
+  - Uses Next.js `output: "standalone"` for a minimal runtime image.
+  - Runs as a non-root user and listens on port `3000`.
 
 ## Project scripts
 
 ```bash
-npm run dev    # Start dev server
-npm run build  # Production build
-npm run start  # Start production server
-npm run lint   # Lint
+npm run dev    # Start the development server
+npm run build  # Create a production build
+npm run start  # Start the production server
+npm run lint   # Run the linter
 ```
 
 ## Notes
 
-- Only environment variables prefixed with `NEXT_PUBLIC_` are available to the browser.
-- If your backend requires CORS, ensure it allows requests from the frontend origin (e.g., `http://localhost:3000`).
+  - **Microphone Permissions:** The application requires microphone permissions for the voice input feature to work.
+  - **Environment Variables:** Only environment variables prefixed with `NEXT_PUBLIC_` are exposed to the browser.
+  - **CORS:** If your backend requires CORS, ensure it allows requests from the frontend origin (e.g., `http://localhost:3000`).

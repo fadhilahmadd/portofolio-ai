@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Message } from '@/types';
-import { streamChatResponse } from '@/lib/api';
+import { sendChatRequest } from '@/lib/api';
 
 export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -23,22 +23,30 @@ export const useChat = () => {
     });
   }, [messages]);
 
-  const handleSend = async (messageText: string = input) => {
-    if (messageText.trim() === '' || isLoading || !sessionId) return;
+  const handleSend = async (messageText: string = input, audioBlob?: Blob) => {
+    const textToSend = messageText.trim();
+    if ((textToSend === '' && !audioBlob) || isLoading || !sessionId) return;
 
-    const userMessage: Message = { id: uuidv4(), sender: 'user', text: messageText };
+    const userMessage: Message = { id: uuidv4(), sender: 'user', text: textToSend || "Audio message" };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
     setError(null);
     setSuggestedQuestions([]);
 
+    const formData = new FormData();
+    formData.append('session_id', sessionId);
+    formData.append('message', textToSend); // Always send the message field
+    formData.append('include_audio_response', 'true');
+    if (audioBlob) {
+      formData.append('audio_file', audioBlob, 'recording.wav');
+    }
+
     let isFirstToken = true;
     const aiMessageId = uuidv4();
 
-    await streamChatResponse(
-      sessionId,
-      messageText,
+    await sendChatRequest(
+      formData,
       (token) => {
         if (isFirstToken) {
           setIsLoading(false);
@@ -56,15 +64,11 @@ export const useChat = () => {
           setSuggestedQuestions(finalData.suggested_questions);
         }
         
-        // Find the AI message that was just streaming and update it
         setMessages(prev => prev.map(msg => {
           if (msg.id === aiMessageId) {
-            // Create a copy of the message to modify
-            const updatedMsg = { ...msg, isStreaming: false };
+            const updatedMsg = { ...msg, isStreaming: false, audioUrl: finalData.audioUrl };
             
-            // If the final data contains a mailto link, append it to the message text
             if (finalData.mailto) {
-              // The \n\n ensures the link appears on a new line for better formatting
               updatedMsg.text += `\n\n[Click here to send an email](${finalData.mailto})`;
             }
             
@@ -75,7 +79,6 @@ export const useChat = () => {
       },
       (err) => {
         setIsLoading(false);
-        // Provide a more specific error message if available
         const errorMessage = err instanceof Error 
           ? `I apologize, but an error occurred: ${err.message}`
           : "I apologize, but I'm encountering a technical issue at the moment. Please try again in a little while.";

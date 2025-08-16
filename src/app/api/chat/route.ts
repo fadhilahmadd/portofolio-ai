@@ -10,15 +10,13 @@ export async function POST(req: Request) {
       );
     }
 
-    const body = await req.json();
+    // Forward the multipart/form-data request
+    const formData = await req.formData();
 
     const upstream = await fetch(`${apiBaseUrl.replace(/\/$/, '')}/api/v1/chat/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'text/event-stream',
-      },
-      body: JSON.stringify(body),
+      body: formData,
+      // Let fetch set the Content-Type header with the correct boundary
     });
 
     if (!upstream.ok || !upstream.body) {
@@ -29,11 +27,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Stream SSE through to the client
     const headers = new Headers();
-    headers.set('Content-Type', upstream.headers.get('content-type') || 'text/event-stream');
+    headers.set('Content-Type', upstream.headers.get('content-type') || 'application/octet-stream');
     headers.set('Cache-Control', 'no-store');
     return new Response(upstream.body, { status: upstream.status, headers });
+
   } catch (err) {
     return new Response(
       JSON.stringify({ error: 'Proxy error', message: (err as Error).message }),
@@ -41,5 +39,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
-
